@@ -1,0 +1,50 @@
+version: '3.3'
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8091"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+    depends_on:
+      - db
+      - redis
+    networks:
+      - app-network
+    volumes:
+      - web-data:/app/data  # Mounting a volume for the web service
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root@123
+      POSTGRES_DB: mydb
+    ports:
+      - "5433:5432"
+    networks:
+      - app-network
+    volumes:
+      - db-data:/var/lib/postgresql/data  # Persist PostgreSQL data
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+    volumes:
+      - redis-data:/data  # Persist Redis data
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  web-data:  # Volume for web service
+  db-data:   # Volume for PostgreSQL data
+  redis-data: # Volume for Redis data
